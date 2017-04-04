@@ -84,16 +84,15 @@ private:
    * \param [in] rtt the RTT estimation.
    * \param [in] tcb the socket state.
    */
-  void EstimateBW (const Time& rtt, Ptr<TcpSocketState> tcb);
+  void EstimateBW (Ptr<TcpSocketState> tcb, const Time& rtt);
 
 protected:
   double                 m_currentBW;              //!< Current value of the estimated BW
-  double                 m_lastBW;                 //!< Last value of the estimated BW
   Time                   m_currentRTT;             //!< Current Value of the RTT
-  Time                   m_lastRTT;                //!< Last Value of the RTT
-  Time                   m_lastAckTime;            //!< 
+  Time                   m_prevAckTime;            //!< 
+  Time                   m_tLast;                  //!< 
   int                    m_ackedSegments;          //!< The number of segments ACKed between RTTs
-  Time                   m_currentAckTime;         //!< 
+  uint32_t               m_K;
 };
 
 } // namespace ns3

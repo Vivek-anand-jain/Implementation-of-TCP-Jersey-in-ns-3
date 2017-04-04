@@ -39,6 +39,10 @@ TcpJersey::GetTypeId (void)
     .SetParent<TcpNewReno>()
     .SetGroupName ("Internet")
     .AddConstructor<TcpJersey>()
+    .AddAttribute ("K", "RTT multiple constant",
+                   UintegerValue (1),
+                   MakeUintegerAccessor (&TcpJersey::m_K),
+                   MakeUintegerChecker<uint32_t> ())
   ;
   return tid;
 }
@@ -46,10 +50,10 @@ TcpJersey::GetTypeId (void)
 TcpJersey::TcpJersey (void) :
   TcpNewReno (),
   m_currentBW (0),
-  m_lastBW (0),
   m_currentRTT (Time (0)),
-  m_lastRTT (Time (0)),
-  m_lastAckTime (Time (0))
+  m_prevAckTime (Time (0)),
+  m_tLast (Time (0)),
+  m_ackedSegments (0)
 {
   NS_LOG_FUNCTION (this);
 }
@@ -57,11 +61,10 @@ TcpJersey::TcpJersey (void) :
 TcpJersey::TcpJersey (const TcpJersey& sock) :
   TcpNewReno (sock),
   m_currentBW (sock.m_currentBW),
-  m_lastBW (sock.m_lastBW),
   m_currentRTT (sock.m_currentRTT),
-  m_lastRTT (Time (0)),
-  m_lastAckTime (Time (0))
-
+  m_prevAckTime (Time (0)),
+  m_tLast (Time (0)),
+  m_ackedSegments (0)
 {
   NS_LOG_FUNCTION (this);
   NS_LOG_LOGIC ("Invoked the copy constructor");
@@ -82,24 +85,31 @@ TcpJersey::PktsAcked (Ptr<TcpSocketState> tcb, uint32_t packetsAcked,
       NS_LOG_WARN ("RTT measured is zero!");
       return;
     }
-  m_ackedSegments = packetsAcked;
-  m_currentAckTime = Simulator::Now ();
+
+  m_ackedSegments += packetsAcked;
+  m_currentRTT = rtt;
+  EstimateBW (tcb, rtt);
 }
 
 void
-TcpJersey::EstimateBW (const Time &rtt, Ptr<TcpSocketState> tcb)
+TcpJersey::EstimateBW (Ptr<TcpSocketState> tcb, const Time &rtt)
 {
   NS_LOG_FUNCTION (this);
   NS_ASSERT (!rtt.IsZero ());
 
-  m_currentRTT = rtt;
+  Time now = Simulator::Now ();
 
-  m_currentBW = (m_currentRTT.GetSeconds () * m_lastBW + (m_ackedSegments * tcb->m_segmentSize)) / (m_currentRTT.GetSeconds () + (m_currentAckTime.GetSeconds () - m_lastAckTime.GetSeconds ()));
-  NS_LOG_LOGIC ("Estimated BW: " << m_currentBW);
+  Time Tw =  rtt * m_K;
+  double delta = now.GetSeconds () - m_prevAckTime.GetSeconds ();
+  m_prevAckTime = now;
 
-  m_lastAckTime = m_currentAckTime;
-  m_lastRTT = m_currentRTT;
-  m_lastBW = m_currentBW;
+  if ((now - m_tLast) >= rtt)
+    {
+      double temp = (Tw.GetSeconds () * m_currentBW) + (m_ackedSegments * tcb->m_segmentSize);
+      m_currentBW = temp / (delta + Tw.GetSeconds ());
+      m_tLast = now;
+      m_ackedSegments = 0; 
+    }
 }
 
 uint32_t
