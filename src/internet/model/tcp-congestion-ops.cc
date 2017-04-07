@@ -209,6 +209,18 @@ TcpNewReno::GetSsThresh (Ptr<const TcpSocketState> state,
   return std::max (2 * state->m_segmentSize, bytesInFlight / 2);
 }
 
+void
+TcpNewReno::RateControl (Ptr<TcpSocketState> tcb, uint32_t bytesInFlight)
+{
+}
+
+void
+TcpNewReno::ExplicitRetransmit (Ptr<TcpSocketState> tcb, uint32_t bytesInFlight)
+{
+  tcb->m_ssThresh = GetSsThresh (tcb, bytesInFlight);
+  tcb->m_cWnd = tcb->m_ssThresh;
+}
+
 Ptr<TcpCongestionOps>
 TcpNewReno::Fork ()
 {

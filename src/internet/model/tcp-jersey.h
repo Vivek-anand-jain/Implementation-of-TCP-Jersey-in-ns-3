@@ -71,6 +71,9 @@ public:
   virtual uint32_t GetSsThresh (Ptr<const TcpSocketState> tcb,
                                 uint32_t bytesInFlight);
 
+  virtual void RateControl (Ptr<TcpSocketState> tcb, uint32_t bytesInFlight);
+  virtual void ExplicitRetransmit (Ptr<TcpSocketState> tcb, uint32_t bytesInFlight);
+
   virtual void PktsAcked (Ptr<TcpSocketState> tcb, uint32_t packetsAcked,
                           const Time& rtt);
 

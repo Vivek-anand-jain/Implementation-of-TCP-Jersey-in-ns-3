@@ -136,6 +136,14 @@ public:
   {
   }
 
+  virtual void RateControl (Ptr<TcpSocketState> tcb, uint32_t bytesInFlight)
+  {
+  }
+
+  virtual void ExplicitRetransmit (Ptr<TcpSocketState> tcb, uint32_t bytesInFlight)
+  {
+  }
+
   // Present in Linux but not in ns-3 yet:
   /* call when cwnd event occurs (optional) */
   // void (*cwnd_event)(struct sock *sk, enum tcp_ca_event ev);
@@ -184,10 +192,14 @@ public:
   std::string GetName () const;
 
   virtual void IncreaseWindow (Ptr<TcpSocketState> tcb, uint32_t segmentsAcked);
+
   virtual uint32_t GetSsThresh (Ptr<const TcpSocketState> tcb,
                                 uint32_t bytesInFlight);
 
   virtual Ptr<TcpCongestionOps> Fork ();
+
+  virtual void RateControl (Ptr<TcpSocketState> tcb, uint32_t bytesInFlight);
+  virtual void ExplicitRetransmit (Ptr<TcpSocketState> tcb, uint32_t bytesInFlight);
 
 protected:
   virtual uint32_t SlowStart (Ptr<TcpSocketState> tcb, uint32_t segmentsAcked);

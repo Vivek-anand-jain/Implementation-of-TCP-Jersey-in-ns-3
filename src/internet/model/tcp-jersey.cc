@@ -118,16 +118,27 @@ TcpJersey::GetSsThresh (Ptr<const TcpSocketState> tcb,
 {
   (void) bytesInFlight;
 
-  uint32_t ownd = m_currentRTT.GetSeconds () * m_currentBW / tcb->m_segmentSize;
-
-  if (ownd < 2)
-    {
-      ownd = 2;
-    }
+  uint32_t ownd = m_currentRTT.GetSeconds () * m_currentBW;
 
   NS_LOG_LOGIC ("CurrentBW: " << m_currentBW << " ssthresh: " << ownd);
 
-  return ownd;
+  return std::max (2 * tcb->m_segmentSize, ownd);
+}
+
+void
+TcpJersey::RateControl (Ptr<TcpSocketState> tcb, uint32_t bytesInFlight)
+{
+  tcb->m_ssThresh = GetSsThresh (tcb, bytesInFlight);
+ 
+  if ((tcb->m_congState == TcpSocketState::CA_OPEN) || (tcb->m_congState == TcpSocketState::CA_DISORDER) || (tcb->m_congState == TcpSocketState::CA_CWR) || (tcb->m_congState == TcpSocketState::CA_RECOVERY) || (tcb->m_congState == TcpSocketState::CA_LOSS) || (tcb->m_congState == TcpSocketState::CA_LAST_STATE))
+    {
+      tcb->m_cWnd = tcb->m_ssThresh;
+    }
+}
+
+void
+TcpJersey::ExplicitRetransmit (Ptr<TcpSocketState> tcb, uint32_t bytesInFlight)
+{
 }
 
 Ptr<TcpCongestionOps>
