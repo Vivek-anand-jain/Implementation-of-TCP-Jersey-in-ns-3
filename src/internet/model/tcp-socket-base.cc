@@ -1673,11 +1673,6 @@ TcpSocketBase::EnterRecovery ()
   m_congestionControl->CongestionStateSet (m_tcb, TcpSocketState::CA_RECOVERY);
   m_tcb->m_congState = TcpSocketState::CA_RECOVERY;
 
-  if (m_tcb->m_ecnState ==  TcpSocketState::ECN_ECE_RCVD)
-    {
-      m_congestionControl->RateControl (m_tcb, BytesInFlight ());
-    }
-
   m_congestionControl->ExplicitRetransmit (m_tcb, BytesInFlight ());
 
   NS_LOG_INFO (m_dupAckCount << " dupack. Enter fast recovery mode." <<
