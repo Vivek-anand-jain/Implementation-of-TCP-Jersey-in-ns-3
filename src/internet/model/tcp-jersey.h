@@ -38,11 +38,11 @@ class Time;
  *
  * \brief An implementation of TCP Westwood and Westwood+.
  *
- * Westwood and Westwood+ employ the AIAD (Additive Increase/Adaptive Decrease) 
- * congestion control paradigm. When a congestion episode happens, 
+ * Westwood and Westwood+ employ the AIAD (Additive Increase/Adaptive Decrease)
+ * congestion control paradigm. When a congestion episode happens,
  * instead of halving the cwnd, these protocols try to estimate the network's
- * bandwidth and use the estimated value to adjust the cwnd. 
- * While Westwood performs the bandwidth sampling every ACK reception, 
+ * bandwidth and use the estimated value to adjust the cwnd.
+ * While Westwood performs the bandwidth sampling every ACK reception,
  * Westwood+ samples the bandwidth every RTT.
  *
  * The two main methods in the implementation are the CountAck (const TCPHeader&)
@@ -80,7 +80,6 @@ public:
   virtual Ptr<TcpCongestionOps> Fork ();
 
 private:
-
   /**
    * Estimate the network's bandwidth
    *
@@ -92,8 +91,8 @@ private:
 protected:
   double                 m_currentBW;              //!< Current value of the estimated BW
   Time                   m_currentRTT;             //!< Current Value of the RTT
-  Time                   m_prevAckTime;            //!< 
-  Time                   m_tLast;                  //!< 
+  Time                   m_prevAckTime;            //!<
+  Time                   m_tLast;                  //!<
   int                    m_ackedSegments;          //!< The number of segments ACKed between RTTs
   uint32_t               m_K;
 };

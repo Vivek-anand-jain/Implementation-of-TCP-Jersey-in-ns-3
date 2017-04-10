@@ -35,10 +35,10 @@ NS_OBJECT_ENSURE_REGISTERED (TcpJersey);
 TypeId
 TcpJersey::GetTypeId (void)
 {
-  static TypeId tid = TypeId("ns3::TcpJersey")
-    .SetParent<TcpNewReno>()
+  static TypeId tid = TypeId ("ns3::TcpJersey")
+    .SetParent<TcpNewReno> ()
     .SetGroupName ("Internet")
-    .AddConstructor<TcpJersey>()
+    .AddConstructor<TcpJersey> ()
     .AddAttribute ("K", "RTT multiple constant",
                    UintegerValue (1),
                    MakeUintegerAccessor (&TcpJersey::m_K),
@@ -47,24 +47,24 @@ TcpJersey::GetTypeId (void)
   return tid;
 }
 
-TcpJersey::TcpJersey (void) :
-  TcpNewReno (),
-  m_currentBW (0),
-  m_currentRTT (Time (0)),
-  m_prevAckTime (Time (0)),
-  m_tLast (Time (0)),
-  m_ackedSegments (0)
+TcpJersey::TcpJersey (void)
+  : TcpNewReno (),
+    m_currentBW (0),
+    m_currentRTT (Time (0)),
+    m_prevAckTime (Time (0)),
+    m_tLast (Time (0)),
+    m_ackedSegments (0)
 {
   NS_LOG_FUNCTION (this);
 }
 
-TcpJersey::TcpJersey (const TcpJersey& sock) :
-  TcpNewReno (sock),
-  m_currentBW (sock.m_currentBW),
-  m_currentRTT (sock.m_currentRTT),
-  m_prevAckTime (Time (0)),
-  m_tLast (Time (0)),
-  m_ackedSegments (0)
+TcpJersey::TcpJersey (const TcpJersey& sock)
+  : TcpNewReno (sock),
+    m_currentBW (sock.m_currentBW),
+    m_currentRTT (sock.m_currentRTT),
+    m_prevAckTime (Time (0)),
+    m_tLast (Time (0)),
+    m_ackedSegments (0)
 {
   NS_LOG_FUNCTION (this);
   NS_LOG_LOGIC ("Invoked the copy constructor");
@@ -76,7 +76,7 @@ TcpJersey::~TcpJersey (void)
 
 void
 TcpJersey::PktsAcked (Ptr<TcpSocketState> tcb, uint32_t packetsAcked,
-                        const Time& rtt)
+                      const Time& rtt)
 {
   NS_LOG_FUNCTION (this << tcb << packetsAcked << rtt);
 
@@ -108,13 +108,13 @@ TcpJersey::EstimateBW (Ptr<TcpSocketState> tcb, const Time &rtt)
       double temp = (Tw.GetSeconds () * m_currentBW) + (m_ackedSegments * tcb->m_segmentSize);
       m_currentBW = temp / (delta + Tw.GetSeconds ());
       m_tLast = now;
-      m_ackedSegments = 0; 
+      m_ackedSegments = 0;
     }
 }
 
 uint32_t
 TcpJersey::GetSsThresh (Ptr<const TcpSocketState> tcb,
-                          uint32_t bytesInFlight)
+                        uint32_t bytesInFlight)
 {
   (void) bytesInFlight;
 
@@ -129,7 +129,7 @@ void
 TcpJersey::RateControl (Ptr<TcpSocketState> tcb, uint32_t bytesInFlight)
 {
   tcb->m_ssThresh = GetSsThresh (tcb, bytesInFlight);
- 
+
   if ((tcb->m_congState == TcpSocketState::CA_OPEN) || (tcb->m_congState == TcpSocketState::CA_DISORDER) || (tcb->m_congState == TcpSocketState::CA_CWR) || (tcb->m_congState == TcpSocketState::CA_RECOVERY) || (tcb->m_congState == TcpSocketState::CA_LOSS) || (tcb->m_congState == TcpSocketState::CA_LAST_STATE))
     {
       tcb->m_cWnd = tcb->m_ssThresh;
