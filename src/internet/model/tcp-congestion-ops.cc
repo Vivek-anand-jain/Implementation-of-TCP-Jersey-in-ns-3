@@ -212,6 +212,8 @@ TcpNewReno::GetSsThresh (Ptr<const TcpSocketState> state,
 void
 TcpNewReno::RateControl (Ptr<TcpSocketState> tcb, uint32_t bytesInFlight)
 {
+  tcb->m_ssThresh = GetSsThresh (tcb, bytesInFlight);
+  tcb->m_cWnd = std::max ((uint32_t)tcb->m_cWnd/2, tcb->m_segmentSize);
 }
 
 void
