@@ -34,38 +34,32 @@
 using namespace ns3;
 
 NS_LOG_COMPONENT_DEFINE ("BulkSendJersey");
-  double stopTime = 10;
 
-void ThroughputMonitor (FlowMonitorHelper *fmhelper, Ptr<FlowMonitor> flowMon)
+
+void ThroughputMonitor (Ptr<FlowMonitor> flowMon)
 {
-/*  std::map<FlowId, FlowMonitor::FlowStats> flowStats = flowMon->GetFlowStats();
-  Ptr<Ipv4FlowClassifier> classing = DynamicCast<Ipv4FlowClassifier> (fmhelper->GetClassifier());
-  for (std::map<FlowId, FlowMonitor::FlowStats>::const_iterator stats = flowStats.begin (); stats != flowStats.end (); ++stats)
-    {
-      Ipv4FlowClassifier::FiveTuple fiveTuple = classing->FindFlow (stats->first);
-      std::cout<<"Flow ID			: " << stats->first <<" ; "<< fiveTuple.sourceAddress <<" -----> "<<fiveTuple.destinationAddress<<std::endl;
-//			std::cout<<"Tx Packets = " << stats->second.txPackets<<std::endl;
-//			std::cout<<"Rx Packets = " << stats->second.rxPackets<<std::endl;
-      std::cout<<"Duration		: "<<stats->second.timeLastRxPacket.GetSeconds()-stats->second.timeFirstTxPacket.GetSeconds()<<std::endl;
-      std::cout<<"Last Received Packet	: "<< stats->second.timeLastRxPacket.GetSeconds()<<" Seconds"<<std::endl;
-      std::cout<<"Throughput: " << stats->second.rxBytes * 8.0 / (stats->second.timeLastRxPacket.GetSeconds()-stats->second.timeFirstTxPacket.GetSeconds())/1024/1024  << " Mbps"<<std::endl;
-      std::cout<<"---------------------------------------------------------------------------"<<std::endl;
-    }
-    */
-        flowMon->CheckForLostPackets ();
-        std::map<FlowId, FlowMonitor::FlowStats> stats = flowMon->GetFlowStats ();
+  double fairnessIndex = 0, xSum = 0, x2Sum = 0;
+
+  std::map<FlowId, FlowMonitor::FlowStats> stats = flowMon->GetFlowStats ();
   for (std::map<FlowId, FlowMonitor::FlowStats>::const_iterator i = stats.begin (); i != stats.end (); ++i)
     {     
       double Throughput = i->second.rxBytes * 8.0 / (i->second.timeLastRxPacket.GetSeconds()- i->second.timeFirstTxPacket.GetSeconds()) /1024;
           std::cout << "Throughput: " << Throughput << " kbps\n";
+          if (i->first <= 10)
+          {
+                xSum = xSum + Throughput;
+                x2Sum = x2Sum + Throughput * Throughput;
+          }
     }
-  Simulator::Schedule(Seconds(stopTime + 1),&ThroughputMonitor, fmhelper, flowMon);
+  fairnessIndex = xSum * xSum / (x2Sum * 10);
+  std::cout << "Fairness Index: " << fairnessIndex << "\n";
+  
 }
 
 int main (int argc, char *argv[])
 {
   uint16_t port = 50000;
-
+  double stopTime = 1000;
   uint32_t    nleftLeaf = 20;
   uint32_t    nrightLeaf = 20;
   uint32_t    maxWindowSize = 2000;
@@ -76,7 +70,7 @@ int main (int argc, char *argv[])
   std::string rightDelay = "10ms";
   std::string middleRate = "100Mbps";
   std::string middleDelay = "45ms";
-  std::string tcpVariant = "ns3::TcpNewReno";
+  std::string tcpVariant = "ns3::TcpJersey";
   std::string mobilityModel = "ns3::ConstantPositionMobilityModel";
 
   CommandLine cmd;
@@ -102,11 +96,11 @@ int main (int argc, char *argv[])
   Config::SetDefault ("ns3::TcpL4Protocol::SocketType", StringValue (tcpVariant));
   
   Config::SetDefault ("ns3::RedQueueDisc::Mode", StringValue ("QUEUE_MODE_PACKETS"));  
-  Config::SetDefault ("ns3::RedQueueDisc::QueueLimit", UintegerValue (100));
-  Config::SetDefault ("ns3::RedQueueDisc::MinTh", DoubleValue (15));
-  Config::SetDefault ("ns3::RedQueueDisc::MaxTh", DoubleValue (15));
+  Config::SetDefault ("ns3::RedQueueDisc::QueueLimit", UintegerValue (200));
+  Config::SetDefault ("ns3::RedQueueDisc::MinTh", DoubleValue (50));
+  Config::SetDefault ("ns3::RedQueueDisc::MaxTh", DoubleValue (50));
   Config::SetDefault ("ns3::RedQueueDisc::QW", DoubleValue (0.2));
-  //Config::SetDefault ("ns3::RedQueueDisc::UseEcn", BooleanValue (true));
+  Config::SetDefault ("ns3::RedQueueDisc::UseEcn", BooleanValue (true));
   Config::SetDefault ("ns3::RedQueueDisc::Gentle", BooleanValue (false));
   Config::SetDefault ("ns3::RedQueueDisc::Gentle", BooleanValue (false));
     
@@ -168,7 +162,6 @@ int main (int argc, char *argv[])
   // Configure application
   for (uint16_t i = 0; i < d.LeftCount (); i++)
     {
-      std::cout << i << std::endl;
       BulkSendHelper ftp ("ns3::TcpSocketFactory", Address ());
       AddressValue remoteAddress (InetSocketAddress (d.GetRightIpv4Address (i), port));
       ftp.SetAttribute ("Remote", remoteAddress);
@@ -190,8 +183,8 @@ int main (int argc, char *argv[])
   std::cout << "Running the simulation" << std::endl;
    
   FlowMonitorHelper fmHelper;
-  Ptr<FlowMonitor> allMon = fmHelper.InstallAll();
-  ThroughputMonitor(&fmHelper, allMon);  
+  Ptr<FlowMonitor> allMon = fmHelper.InstallAll();  
+  Simulator::Schedule(Seconds(stopTime + 1),&ThroughputMonitor, allMon);
 
   Simulator::Stop (Seconds (stopTime + 2));
   Simulator::Run ();
