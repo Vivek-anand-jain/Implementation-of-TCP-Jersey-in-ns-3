@@ -68,13 +68,15 @@ WirelessJerseyHelper::WirelessJerseyHelper (uint32_t nLeftLeaf,
   leftToMiddleDevice = bottleneckHelper.Install (nc1);
   
   YansWifiChannelHelper channel = YansWifiChannelHelper::Default ();
+  channel.AddPropagationLoss ("ns3::LogDistancePropagationLossModel",
+                              "ReferenceLoss", DoubleValue (10.0));
   YansWifiPhyHelper phy = YansWifiPhyHelper::Default ();
   phy.SetChannel (channel.Create ());
 
   WifiHelper wifi;
   wifi.SetStandard (WIFI_PHY_STANDARD_80211b);
   wifi.SetRemoteStationManager ("ns3::ConstantRateWifiManager",
-                                "DataMode", StringValue ("DsssRate2Mbps"),
+                                "DataMode", StringValue ("DsssRate11Mbps"),
                                 "ControlMode", StringValue ("DsssRate1Mbps"));
 
   WifiMacHelper mac;

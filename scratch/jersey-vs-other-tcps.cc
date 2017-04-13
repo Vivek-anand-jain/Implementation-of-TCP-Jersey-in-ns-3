@@ -35,8 +35,8 @@ using namespace ns3;
 
 NS_LOG_COMPONENT_DEFINE ("BulkSendJersey");
 
-uint32_t    nleftLeaf = 20;
-uint32_t    nrightLeaf = 20;
+  uint32_t    nleftLeaf = 4;
+  uint32_t    nrightLeaf = 4;
 
 void ThroughputMonitor (Ptr<FlowMonitor> flowMon)
 {
@@ -70,8 +70,6 @@ int main (int argc, char *argv[])
 {
   uint16_t port = 50000;
   double stopTime = 300;
-  uint32_t    nleftLeaf = 20;
-  uint32_t    nrightLeaf = 20;
   uint32_t    maxWindowSize = 2000;
   bool isWindowScalingEnabled = true;
   std::string leftRate = "150Mbps";
@@ -80,7 +78,10 @@ int main (int argc, char *argv[])
   std::string rightDelay = "10ms";
   std::string middleRate = "100Mbps";
   std::string middleDelay = "45ms";
+  std::string TcpNewReno = "ns3::TcpNewReno";
   std::string TcpJersey = "ns3::TcpJersey";
+  std::string TcpWestwood = "ns3::TcpWestwood";
+  std::string TcpVegas = "ns3::TcpVegas";
   std::string mobilityModel = "ns3::ConstantPositionMobilityModel";
 
   CommandLine cmd;
@@ -93,7 +94,6 @@ int main (int argc, char *argv[])
   */
   Config::SetDefault ("ns3::TcpSocketBase::MaxWindowSize", UintegerValue (maxWindowSize));
   Config::SetDefault ("ns3::TcpSocketBase::WindowScaling", BooleanValue (isWindowScalingEnabled));
-  Config::SetDefault ("ns3::TcpL4Protocol::SocketType", StringValue (TcpJersey));
   
   Config::SetDefault ("ns3::RedQueueDisc::Mode", StringValue ("QUEUE_MODE_PACKETS"));  
   Config::SetDefault ("ns3::RedQueueDisc::QueueLimit", UintegerValue (200));
@@ -158,7 +158,15 @@ int main (int argc, char *argv[])
 
  Ipv4GlobalRoutingHelper::PopulateRoutingTables ();
  
+  Config::Set ("$ns3::NodeListPriv/NodeList/" + std::to_string(3) + "/$ns3::TcpL4Protocol/SocketType", TypeIdValue (TypeId::LookupByName (TcpJersey)));
 
+  Config::Set ("$ns3::NodeListPriv/NodeList/" + std::to_string(4) + "/$ns3::TcpL4Protocol/SocketType", TypeIdValue (TypeId::LookupByName (TcpNewReno)));
+   
+  Config::Set ("$ns3::NodeListPriv/NodeList/" + std::to_string(5) + "/$ns3::TcpL4Protocol/SocketType", TypeIdValue (TypeId::LookupByName (TcpWestwood)));
+    
+  Config::Set ("$ns3::NodeListPriv/NodeList/" + std::to_string(6) + "/$ns3::TcpL4Protocol/SocketType", TypeIdValue (TypeId::LookupByName (TcpVegas)));
+ 
+ 
   // Configure application
   for (uint16_t i = 0; i < d.LeftCount (); i++)
     {
