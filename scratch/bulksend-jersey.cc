@@ -28,27 +28,55 @@
 #include "ns3/point-to-point-module.h"
 #include "ns3/point-to-point-layout-module.h"
 #include "ns3/traffic-control-module.h"
+#include "ns3/gtk-config-store.h"
+#include "ns3/flow-monitor-module.h"
 
 using namespace ns3;
 
 NS_LOG_COMPONENT_DEFINE ("BulkSendJersey");
+  double stopTime = 10;
+
+void ThroughputMonitor (FlowMonitorHelper *fmhelper, Ptr<FlowMonitor> flowMon)
+{
+/*  std::map<FlowId, FlowMonitor::FlowStats> flowStats = flowMon->GetFlowStats();
+  Ptr<Ipv4FlowClassifier> classing = DynamicCast<Ipv4FlowClassifier> (fmhelper->GetClassifier());
+  for (std::map<FlowId, FlowMonitor::FlowStats>::const_iterator stats = flowStats.begin (); stats != flowStats.end (); ++stats)
+    {
+      Ipv4FlowClassifier::FiveTuple fiveTuple = classing->FindFlow (stats->first);
+      std::cout<<"Flow ID			: " << stats->first <<" ; "<< fiveTuple.sourceAddress <<" -----> "<<fiveTuple.destinationAddress<<std::endl;
+//			std::cout<<"Tx Packets = " << stats->second.txPackets<<std::endl;
+//			std::cout<<"Rx Packets = " << stats->second.rxPackets<<std::endl;
+      std::cout<<"Duration		: "<<stats->second.timeLastRxPacket.GetSeconds()-stats->second.timeFirstTxPacket.GetSeconds()<<std::endl;
+      std::cout<<"Last Received Packet	: "<< stats->second.timeLastRxPacket.GetSeconds()<<" Seconds"<<std::endl;
+      std::cout<<"Throughput: " << stats->second.rxBytes * 8.0 / (stats->second.timeLastRxPacket.GetSeconds()-stats->second.timeFirstTxPacket.GetSeconds())/1024/1024  << " Mbps"<<std::endl;
+      std::cout<<"---------------------------------------------------------------------------"<<std::endl;
+    }
+    */
+        flowMon->CheckForLostPackets ();
+        std::map<FlowId, FlowMonitor::FlowStats> stats = flowMon->GetFlowStats ();
+  for (std::map<FlowId, FlowMonitor::FlowStats>::const_iterator i = stats.begin (); i != stats.end (); ++i)
+    {     
+      double Throughput = i->second.rxBytes * 8.0 / (i->second.timeLastRxPacket.GetSeconds()- i->second.timeFirstTxPacket.GetSeconds()) /1024;
+          std::cout << "Throughput: " << Throughput << " kbps\n";
+    }
+  Simulator::Schedule(Seconds(stopTime + 1),&ThroughputMonitor, fmhelper, flowMon);
+}
 
 int main (int argc, char *argv[])
 {
-  double stopTime = 100;
   uint16_t port = 50000;
 
-  uint32_t    nleftLeaf = 2;
-  uint32_t    nrightLeaf = 2;
+  uint32_t    nleftLeaf = 20;
+  uint32_t    nrightLeaf = 20;
   uint32_t    maxWindowSize = 2000;
   bool isWindowScalingEnabled = true;
-  std::string leftRate = "5Mbps";
-  std::string leftDelay = "2ms";
-  std::string rightRate = "10Mbps";
+  std::string leftRate = "150Mbps";
+  std::string leftDelay = "10ms";
+  std::string rightRate = "150Mbps";
   std::string rightDelay = "10ms";
-  std::string middleRate = "10Mbps";
-  std::string middleDelay = "10ms";
-  std::string tcpVariant = "ns3::TcpJersey";
+  std::string middleRate = "100Mbps";
+  std::string middleDelay = "45ms";
+  std::string tcpVariant = "ns3::TcpNewReno";
   std::string mobilityModel = "ns3::ConstantPositionMobilityModel";
 
   CommandLine cmd;
@@ -72,7 +100,16 @@ int main (int argc, char *argv[])
   Config::SetDefault ("ns3::TcpSocketBase::MaxWindowSize", UintegerValue (maxWindowSize));
   Config::SetDefault ("ns3::TcpSocketBase::WindowScaling", BooleanValue (isWindowScalingEnabled));
   Config::SetDefault ("ns3::TcpL4Protocol::SocketType", StringValue (tcpVariant));
-
+  
+  Config::SetDefault ("ns3::RedQueueDisc::Mode", StringValue ("QUEUE_MODE_PACKETS"));  
+  Config::SetDefault ("ns3::RedQueueDisc::QueueLimit", UintegerValue (100));
+  Config::SetDefault ("ns3::RedQueueDisc::MinTh", DoubleValue (15));
+  Config::SetDefault ("ns3::RedQueueDisc::MaxTh", DoubleValue (15));
+  Config::SetDefault ("ns3::RedQueueDisc::QW", DoubleValue (0.2));
+  //Config::SetDefault ("ns3::RedQueueDisc::UseEcn", BooleanValue (true));
+  Config::SetDefault ("ns3::RedQueueDisc::Gentle", BooleanValue (false));
+  Config::SetDefault ("ns3::RedQueueDisc::Gentle", BooleanValue (false));
+    
  /**
   * Creating point to point channel for bottleneck
   * Setting the date rate of the bottleneck link
@@ -131,6 +168,7 @@ int main (int argc, char *argv[])
   // Configure application
   for (uint16_t i = 0; i < d.LeftCount (); i++)
     {
+      std::cout << i << std::endl;
       BulkSendHelper ftp ("ns3::TcpSocketFactory", Address ());
       AddressValue remoteAddress (InetSocketAddress (d.GetRightIpv4Address (i), port));
       ftp.SetAttribute ("Remote", remoteAddress);
@@ -150,7 +188,12 @@ int main (int argc, char *argv[])
     }
 
   std::cout << "Running the simulation" << std::endl;
- 
+   
+  FlowMonitorHelper fmHelper;
+  Ptr<FlowMonitor> allMon = fmHelper.InstallAll();
+  ThroughputMonitor(&fmHelper, allMon);  
+
+  Simulator::Stop (Seconds (stopTime + 2));
   Simulator::Run ();
   Simulator::Destroy ();
   return 0;
