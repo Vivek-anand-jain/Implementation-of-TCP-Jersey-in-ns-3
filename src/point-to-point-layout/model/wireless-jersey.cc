@@ -166,8 +166,6 @@ void WirelessJerseyHelper::InstallStack (InternetStackHelper stack)
   stack.Install (m_centralNodes);
   stack.Install (m_leftLeaf);
   stack.Install (m_rightLeaf);
-  
-
 }
 
 void WirelessJerseyHelper::AssignIpv4Addresses (Ipv4AddressHelper leftIp,
@@ -176,32 +174,29 @@ void WirelessJerseyHelper::AssignIpv4Addresses (Ipv4AddressHelper leftIp,
                                                 Ipv4AddressHelper middleToRightIp)
 {
 
-  // Assign to left side 
-  NetDeviceContainer ndc1;
-  ndc1.Add (m_leftLeafDevices);
-  ndc1.Add(m_leftRouterDevices);
-  Ipv4InterfaceContainer ifc1 = leftIp.Assign (ndc1);
-  
-   for (uint32_t i = 0; i < LeftCount (); ++i)
-   {
-      m_leftLeafInterfaces.Add (ifc1.Get (i));
+   // Assign to left side 
+  for (uint32_t i = 0; i < LeftCount (); ++i)
+    {
+     NetDeviceContainer ndc;
+     ndc.Add (m_leftLeafDevices.Get (i));
+     ndc.Add (m_leftRouterDevices.Get (i));
+     Ipv4InterfaceContainer ifc = leftIp.Assign (ndc);
+     m_leftLeafInterfaces.Add (ifc.Get (0));
+     m_leftRouterInterfaces.Add (ifc.Get (1));
+     leftIp.NewNetwork ();
     }
-  m_leftRouterInterfaces.Add (ifc1.Get (LeftCount()));
-  leftIp.NewNetwork ();
-  
-  
-  // Assign to right side 
-  NetDeviceContainer ndc2;
-  ndc2.Add (m_rightLeafDevices);
-  ndc2.Add(m_rightRouterDevices);
-  Ipv4InterfaceContainer ifc2 = rightIp.Assign (ndc2);
-  
-   for (uint32_t i = 0; i < RightCount (); ++i)
+
+   // Assign to right side 
+  for (uint32_t i = 0; i < RightCount (); ++i)
    {
-      m_rightLeafInterfaces.Add (ifc2.Get (i));
-    }
-  m_rightRouterInterfaces.Add (ifc2.Get (LeftCount()));
-  leftIp.NewNetwork ();
+     NetDeviceContainer ndc;
+     ndc.Add (m_rightLeafDevices.Get (i));
+     ndc.Add (m_rightRouterDevices.Get (i));
+     Ipv4InterfaceContainer ifc = rightIp.Assign (ndc);
+     m_rightLeafInterfaces.Add (ifc.Get (0));
+     m_rightRouterInterfaces.Add (ifc.Get (1));
+     rightIp.NewNetwork ();
+   }
   
   m_middleRouterToLeftInterfaces = leftToMidddleIp.Assign (leftToMiddleDevice);
   m_middleRouterToRightInterfaces = middleToRightIp.Assign (middleToRightDevice);
