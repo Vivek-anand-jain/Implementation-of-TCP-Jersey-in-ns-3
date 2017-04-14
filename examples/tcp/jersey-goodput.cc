@@ -39,26 +39,26 @@ main (int argc, char *argv[])
   bool isWindowScalingEnabled = true;
   std::string tcp = "ns3::TcpJersey";
   std::string mobilityModel = "ns3::ConstantPositionMobilityModel";
-  
+
   CommandLine cmd;
   cmd.Parse (argc, argv);
-  
+
   Config::SetDefault ("ns3::TcpSocketBase::MaxWindowSize", UintegerValue (maxWindowSize));
   Config::SetDefault ("ns3::TcpSocketBase::WindowScaling", BooleanValue (isWindowScalingEnabled));
   Config::SetDefault ("ns3::TcpL4Protocol::SocketType", StringValue (tcp));
 
   NodeContainer wifiNodes;
   wifiNodes.Create (2);
-  
+
   NodeContainer wireNodes;
   wireNodes.Create (1);
-  
+
   PointToPointHelper leftHelper;
   leftHelper.SetDeviceAttribute    ("DataRate", StringValue (leftRate));
   leftHelper.SetChannelAttribute   ("Delay", StringValue (leftDelay));
-  
-  NetDeviceContainer leftNetDevices = leftHelper.Install (wireNodes.Get (0), wifiNodes.Get(0));
-  
+
+  NetDeviceContainer leftNetDevices = leftHelper.Install (wireNodes.Get (0), wifiNodes.Get (0));
+
   YansWifiChannelHelper channel = YansWifiChannelHelper::Default ();
   YansWifiPhyHelper phy = YansWifiPhyHelper::Default ();
   phy.SetChannel (channel.Create ());
@@ -78,7 +78,7 @@ main (int argc, char *argv[])
   MobilityHelper mobility;
   mobility.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
   mobility.Install (wifiNodes);
-  
+
   InternetStackHelper stack;
   stack.Install (wireNodes);
   stack.Install (wifiNodes);
@@ -88,14 +88,14 @@ main (int argc, char *argv[])
   leftAddress.SetBase ("10.1.1.0", "255.255.255.0");
 
   Ipv4InterfaceContainer leftInterfaces = leftAddress.Assign (leftNetDevices);
-  
+
   Ipv4AddressHelper rightAddress;
   rightAddress.SetBase ("10.2.1.0", "255.255.255.0");
-  
+
   Ipv4InterfaceContainer rightInterfaces = rightAddress.Assign (rightNetDevices);
-  
+
   Ipv4GlobalRoutingHelper::PopulateRoutingTables ();
-  
+
   BulkSendHelper ftp ("ns3::TcpSocketFactory", Address ());
   AddressValue remoteAddress (InetSocketAddress (rightInterfaces.GetAddress (1), port));
   ftp.SetAttribute ("Remote", remoteAddress);
@@ -108,12 +108,12 @@ main (int argc, char *argv[])
   Address sinkLocalAddress (InetSocketAddress (Ipv4Address::GetAny (), port));
   PacketSinkHelper sinkHelper ("ns3::TcpSocketFactory", sinkLocalAddress);
   sinkHelper.SetAttribute ("Protocol", TypeIdValue (TcpSocketFactory::GetTypeId ()));
-  
+
   ApplicationContainer sinkApp = sinkHelper.Install (wifiNodes.Get (1));
   sinkApp.Start (Seconds (0));
   sinkApp.Stop (Seconds (stopTime));
-  
-  
+
+
   phy.EnablePcapAll ("good-put");
 
   Simulator::Run ();

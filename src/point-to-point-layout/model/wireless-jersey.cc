@@ -46,28 +46,28 @@ WirelessJerseyHelper::WirelessJerseyHelper (uint32_t nLeftLeaf,
                                             uint32_t nRightLeaf,
                                             PointToPointHelper leftHelper,
                                             PointToPointHelper rightHelper,
-					    PointToPointHelper bottleneckHelper,
+                                            PointToPointHelper bottleneckHelper,
                                             std::string mobilityModel)
 {
-  
-  m_centralNodes.Create(3);
+
+  m_centralNodes.Create (3);
   NodeContainer nc1;
   nc1.Add (m_centralNodes.Get (0));
   nc1.Add (m_centralNodes.Get (1));
-  
+
   NodeContainer nc2;
   nc2.Add (m_centralNodes.Get (1));
   nc2.Add (m_centralNodes.Get (2));
-  
+
   // Create the leaf nodes
   m_leftLeaf.Create (nLeftLeaf);
-  
+
   // Create the right nodes
   m_rightLeaf.Create (nRightLeaf);
 
   // Add the link connecting routers
   leftToMiddleDevice = bottleneckHelper.Install (nc1);
-  
+
   YansWifiChannelHelper channel = YansWifiChannelHelper::Default ();
   channel.AddPropagationLoss ("ns3::LogDistancePropagationLossModel",
                               "ReferenceLoss", DoubleValue (10.0));
@@ -82,28 +82,28 @@ WirelessJerseyHelper::WirelessJerseyHelper (uint32_t nLeftLeaf,
 
   WifiMacHelper mac;
   mac.SetType ("ns3::AdhocWifiMac");
-  
+
   MobilityHelper mobility;
   mobility.SetMobilityModel (mobilityModel);
   mobility.Install (nc2);
 
   NetDeviceContainer devices;
   devices = wifi.Install (phy, mac, nc2);
-  
+
   middleToRightDevice.Add (devices);
 
 
-  
+
   // Add the left side links
-  for(uint32_t i = 0; i < nLeftLeaf;  ++i)
-  {
-        NetDeviceContainer c = leftHelper.Install (m_centralNodes.Get (0),
-                                          m_leftLeaf.Get (i));
-        m_leftRouterDevices.Add (c.Get (0));
-        m_leftLeafDevices.Add (c.Get (1));
-  }
-  
-  
+  for (uint32_t i = 0; i < nLeftLeaf;  ++i)
+    {
+      NetDeviceContainer c = leftHelper.Install (m_centralNodes.Get (0),
+                                                 m_leftLeaf.Get (i));
+      m_leftRouterDevices.Add (c.Get (0));
+      m_leftLeafDevices.Add (c.Get (1));
+    }
+
+
   // Add the right side links
   for (uint32_t i = 0; i < nRightLeaf; ++i)
     {
@@ -140,7 +140,7 @@ Ptr<Node> WirelessJerseyHelper::GetRight (uint32_t i) const
 }
 
 Ptr<Node> WirelessJerseyHelper::GetMiddle () const
-{ 
+{
   return m_centralNodes.Get (1);
 }
 
@@ -177,30 +177,30 @@ void WirelessJerseyHelper::AssignIpv4Addresses (Ipv4AddressHelper leftIp,
                                                 Ipv4AddressHelper middleToRightIp)
 {
 
-   // Assign to left side 
+  // Assign to left side
   for (uint32_t i = 0; i < LeftCount (); ++i)
     {
-     NetDeviceContainer ndc;
-     ndc.Add (m_leftLeafDevices.Get (i));
-     ndc.Add (m_leftRouterDevices.Get (i));
-     Ipv4InterfaceContainer ifc = leftIp.Assign (ndc);
-     m_leftLeafInterfaces.Add (ifc.Get (0));
-     m_leftRouterInterfaces.Add (ifc.Get (1));
-     leftIp.NewNetwork ();
+      NetDeviceContainer ndc;
+      ndc.Add (m_leftLeafDevices.Get (i));
+      ndc.Add (m_leftRouterDevices.Get (i));
+      Ipv4InterfaceContainer ifc = leftIp.Assign (ndc);
+      m_leftLeafInterfaces.Add (ifc.Get (0));
+      m_leftRouterInterfaces.Add (ifc.Get (1));
+      leftIp.NewNetwork ();
     }
 
-   // Assign to right side 
+  // Assign to right side
   for (uint32_t i = 0; i < RightCount (); ++i)
-   {
-     NetDeviceContainer ndc;
-     ndc.Add (m_rightLeafDevices.Get (i));
-     ndc.Add (m_rightRouterDevices.Get (i));
-     Ipv4InterfaceContainer ifc = rightIp.Assign (ndc);
-     m_rightLeafInterfaces.Add (ifc.Get (0));
-     m_rightRouterInterfaces.Add (ifc.Get (1));
-     rightIp.NewNetwork ();
-   }
-  
+    {
+      NetDeviceContainer ndc;
+      ndc.Add (m_rightLeafDevices.Get (i));
+      ndc.Add (m_rightRouterDevices.Get (i));
+      Ipv4InterfaceContainer ifc = rightIp.Assign (ndc);
+      m_rightLeafInterfaces.Add (ifc.Get (0));
+      m_rightRouterInterfaces.Add (ifc.Get (1));
+      rightIp.NewNetwork ();
+    }
+
   m_middleRouterToLeftInterfaces = leftToMidddleIp.Assign (leftToMiddleDevice);
   m_middleRouterToRightInterfaces = middleToRightIp.Assign (middleToRightDevice);
 }

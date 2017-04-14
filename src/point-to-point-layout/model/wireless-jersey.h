@@ -41,13 +41,12 @@ namespace ns3 {
 class WirelessJerseyHelper
 {
 public:
-
   WirelessJerseyHelper (uint32_t nLeftLeaf,
                         uint32_t nRightLeaf,
                         PointToPointHelper rightHelpe,
-                        PointToPointHelper leftHelper,    
+                        PointToPointHelper leftHelper,
                         PointToPointHelper centrallinkHelper,
-			std::string mobilityModel);
+                        std::string mobilityModel);
 
   ~WirelessJerseyHelper ();
 
@@ -104,7 +103,7 @@ public:
   uint32_t  RightCount () const;
 
   /**
-   * \param stack an InternetStackHelper which is used to install 
+   * \param stack an InternetStackHelper which is used to install
    *              on every node in the wireless-jersey
    */
   void      InstallStack (InternetStackHelper stack);
@@ -116,16 +115,16 @@ public:
    * \param rightIp Ipv4AddressHelper to assign Ipv4 addresses to the
    *                interfaces on the right side of the wireless-jersey
    *
-   * \param leftToMiddleRotuerIP Ipv4AddressHelper to assign Ipv4 addresses to the 
+   * \param leftToMiddleRotuerIP Ipv4AddressHelper to assign Ipv4 addresses to the
    *                 interfaces between left to middle router
    *
-   * \param middleToRightIp Ipv4AddressHelper to assign Ipv4 addresses to the 
+   * \param middleToRightIp Ipv4AddressHelper to assign Ipv4 addresses to the
    *                 interfaces between middle router to right
    */
-void AssignIpv4Addresses (Ipv4AddressHelper leftIp,
-                          Ipv4AddressHelper rightIp,
-                          Ipv4AddressHelper leftToMidddleIp,
-                          Ipv4AddressHelper middleToRightIp);
+  void AssignIpv4Addresses (Ipv4AddressHelper leftIp,
+                            Ipv4AddressHelper rightIp,
+                            Ipv4AddressHelper leftToMidddleIp,
+                            Ipv4AddressHelper middleToRightIp);
 
 
 
@@ -135,8 +134,8 @@ private:
 
   NodeContainer          m_rightLeaf;                          //!< Right Leaf nodes
   NetDeviceContainer     m_rightLeafDevices;                   //!< Right Leaf NetDevices
-  
-  NodeContainer          m_centralNodes;        
+
+  NodeContainer          m_centralNodes;
 
   NetDeviceContainer     m_leftRouterDevices;                 //!< Routers NetDevices
   NetDeviceContainer     m_rightRouterDevices;                //!< Right router NetDevices
