@@ -12,8 +12,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- * Authors:   Sourabh Jain <sourabhjain560@outlook.com>
- *            Vivek Jain   <jain.vivek.anand@gmail.com>
+ *
+ * Authors: Vivek Jain <jain.vivek.anand@gmail.com>
+ *          Sourabh Jain <sourabhjain560@outlook.com>
+ *          Mohit P. Tahiliani <tahiliani@nitk.edu.in>
  */
 
 #include "ns3/core-module.h"
