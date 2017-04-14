@@ -6,7 +6,7 @@
 
 ### Overview
 
-TCp-Jersey [1] is a variant of TCP, It makes TCP to perform better in wireless and wired-wireless hybrid networks environment by differentiating the packet losses caused by network congestions from the losses caused by wireless link errors. This
+TCP-Jersey [1] is a variant of TCP, It makes TCP to perform better in wireless and wired-wireless hybrid networks environment by differentiating the packet losses caused by network congestions from the losses caused by wireless link errors. This
 repository provides an implementation of TCP-Jersey in ns-3 [2].
 
 ### TCP-Jersey Examples
