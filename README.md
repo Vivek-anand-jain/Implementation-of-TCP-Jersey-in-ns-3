@@ -17,7 +17,7 @@ Example programs for TCP-Jersey have been provided in
 
 and should be executed as
 
-`./waf --run "tcp-variants-comparison transport_prot=TcpJersey"`
+`./waf --run "tcp-variants-comparison --transport_prot=TcpJersey"`
 
 `./waf --run jersey-fairness`
 
