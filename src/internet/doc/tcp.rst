@@ -734,6 +734,17 @@ side by using the timestamps option in TCP header
 
 More information about LEDBAT is available in RFC 6817: https://tools.ietf.org/html/rfc6817
 
+Jersey
+^^^^^^
+
+TCP-Jersey is a variant of TCP, It makes TCP to perform better in wireless and wired-wireless hybrid networks environment by differentiating the packet losses caused by network congestions from the losses caused by wireless link errors. It uses ECN to differentiate losses.
+
+* Jersey decreases cwnd if receives acks with CW mark
+* Jersey does not decrease cwnd if receives nDupAcks without CW mark
+* Jersey decreases sshthresh and cWnd if receives nDupAcks with CW mark
+
+More information about Jersey is available at http://ieeexplore.ieee.org/document/1295061
+
 Support for Explicit Congestion Notification (ECN)
 ++++++++++++++++++++++++++++++++++++++++++++++++++
 
