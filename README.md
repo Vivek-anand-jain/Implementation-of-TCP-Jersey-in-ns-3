@@ -11,7 +11,7 @@ repository provides an implementation of TCP-Jersey in ns-3 [2].
 
 ### TCP-Jersey Examples
 
-Example programs for TCP-Jersey have been provided in
+Example programs for TCP-Jersey have been provided under
 
 `examples/tcp/`
 
