@@ -70,8 +70,6 @@ int main (int argc, char *argv[])
 {
   uint16_t port = 50000;
   double stopTime = 300;
-  uint32_t    nleftLeaf = 20;
-  uint32_t    nrightLeaf = 20;
   uint32_t    maxWindowSize = 2000;
   bool isWindowScalingEnabled = true;
   std::string leftRate = "150Mbps";

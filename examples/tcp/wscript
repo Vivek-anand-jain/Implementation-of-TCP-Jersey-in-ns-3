@@ -38,4 +38,14 @@ def build(bld):
                                  ['point-to-point', 'internet', 'applications', 'flow-monitor'])
 
     obj.source = 'tcp-variants-comparison.cc'
-    
+
+    obj = bld.create_ns3_program('jersey-fairness',
+                                 ['point-to-point', 'point-to-point-layout', 'applications', 'internet', 'wifi', 'flow-monitor'])
+    obj.source = 'jersey-fairness.cc'
+
+    obj = bld.create_ns3_program('jersey-goodput',
+                                 ['point-to-point', 'point-to-point-layout', 'applications', 'internet', 'wifi'])
+    obj.source = 'jersey-goodput.cc'
+    obj = bld.create_ns3_program('jersey-vs-other-tcps',
+                                 ['point-to-point', 'point-to-point-layout', 'applications', 'internet', 'wifi', 'flow-monitor'])
+    obj.source = 'jersey-vs-other-tcps.cc'
